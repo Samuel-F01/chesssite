@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Samuel‑F — Apps</title>
+    <meta name="description" content="Deux applications d’échecs : KingClock (horloge d’échecs) et ChessStreak (journal d’échecs)." />
+    <style>
+      :root{
+        --bg: #0b1020;
+        --surface: rgba(255,255,255,0.06);
+        --border: rgba(255,255,255,0.12);
+        --text: #e8ecf1;
+        --muted: #a8b3c6;
+        --accent: #5dd3ff;
+        --accent-2: #9d8cff;
+        --shadow: 0 18px 42px rgba(0,0,0,0.45);
+        --radius: 22px;
+      }
+      *{box-sizing:border-box}
+      html,body{height:100%}
+      body{
+        margin:0;
+        font: 16px/1.6 system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+        color: var(--text);
+        background:
+          radial-gradient(1200px 600px at 10% -10%, rgba(93,211,255,0.10), transparent 60%),
+          radial-gradient(1000px 700px at 100% 0%, rgba(157,140,255,0.10), transparent 50%),
+          var(--bg);
+      }
+
+      /* === Centrage plein écran === */
+      .page{ min-height: 100svh; display:flex; align-items:center; justify-content:center; padding: 32px; }
+
+      /* === Carte centrale === */
+      .wrap{ position:relative; width:100%; max-width: 960px; padding: 40px 26px 50px; background: var(--surface); border:1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); backdrop-filter: blur(6px); }
+
+      header{ text-align:center; margin-bottom: 28px; }
+      h1{font-weight: 800; letter-spacing: -0.02em; margin:0; font-size: clamp(28px, 4vw, 40px)}
+      .tagline{color: var(--muted); font-size: 15px}
+
+      .grid{display:grid; grid-template-columns: 1fr; gap:20px; max-width:880px; margin: 0 auto;}
+      @media (min-width: 760px){ .grid{grid-template-columns: 1fr 1fr;} }
+
+      .app{ display:flex; flex-direction:column; gap:14px; padding:20px; border-radius: 18px; background: rgba(255,255,255,0.04); border:1px solid var(--border); box-shadow: var(--shadow); }
+      .app:hover{ transform: translateY(-2px); transition: transform .2s ease; }
+
+      .app-header{ display:flex; align-items:center; gap:14px; }
+      .icon{ width:68px; height:68px; border-radius: 16px; display:grid; place-items:center; font-size:36px; background: linear-gradient(135deg, rgba(93,211,255,0.25), rgba(157,140,255,0.25)); border:1px solid rgba(255,255,255,0.2); }
+      .app-title{ margin:0; font-size: 21px; letter-spacing:-0.01em }
+      .pill{display:inline-block; margin-left:6px; font-size:12px; color:#0b1020; background: linear-gradient(90deg, var(--accent), var(--accent-2)); padding:6px 10px; border-radius:999px; font-weight:700}
+
+      .app-desc{ margin:0; color:var(--muted); font-size:15px }
+      .spacer{ flex:1 1 auto; }
+
+      /* === Bouton App Store en BAS du bloc === */
+      .store{ margin-top:auto; }
+      .store-badge{ width:100%; display:inline-flex; align-items:center; justify-content:center; gap:10px; text-decoration:none; padding:14px 16px; border-radius: 14px; border:1px solid var(--border); background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.06)); color: var(--text); font-weight:800; letter-spacing:.02em; box-shadow: var(--shadow); }
+      .store-badge:hover{ transform: translateY(-1px); }
+      .store-badge:focus-visible{ outline: 3px solid var(--accent); outline-offset: 3px; }
+      .apple{ width:22px; height:22px; border-radius:6px; display:grid; place-items:center; background: linear-gradient(135deg, rgba(93,211,255,0.3), rgba(157,140,255,0.3)); border:1px solid rgba(255,255,255,0.22); font-size:14px; }
+      .sub{ opacity:.9; font-size:11px; line-height:1; display:block; margin-top:-2px; }
+
+      footer{margin-top: 26px; color: var(--muted); font-size: 13px; text-align:center}
+
+      /* === Sélecteur de langue === */
+      .lang-switch{ position:absolute; top: 12px; right: 12px; display:inline-flex; gap:8px; background: rgba(255,255,255,0.08); border:1px solid var(--border); padding:6px; border-radius: 999px; }
+      .lang-switch button{ appearance:none; border:0; padding:6px 10px; border-radius: 999px; cursor:pointer; font-weight:700; color: var(--text); background: transparent; }
+      .lang-switch button[aria-pressed="true"]{ background: linear-gradient(90deg, var(--accent), var(--accent-2)); color:#0b1020; }
+
+      @media (prefers-color-scheme: light){
+        :root{ --bg: #f6f8fc; --text: #0d1220; --muted: #47506b; --surface:#ffffff; --border: rgba(0,0,0,0.08); --shadow: 0 10px 30px rgba(0,0,0,0.10)}
+        .app{ background:#fff }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <div class="wrap">
+        <div class="lang-switch" role="group" aria-label="Sélecteur de langue / Language switcher">
+          <button id="btn-fr" type="button" data-lang="fr" aria-pressed="true" aria-label="Basculer en français">FR</button>
+          <button id="btn-en" type="button" data-lang="en" aria-pressed="false" aria-label="Switch to English">EN</button>
+        </div>
+
+        <header>
+          <h1>Samuel‑F — Apps</h1>
+          <div class="tagline" data-i18n="tagline">Outils d’échecs simples et efficaces</div>
+        </header>
+
+        <main class="grid" aria-label="Applications">
+          <!-- Remplacez les # ci-dessous par les URLs App Store réelles -->
+          <article class="app" id="app-kc">
+            <div class="app-header">
+              <div class="icon" aria-hidden="true">⏱️</div>
+              <h2 class="app-title" data-i18n="kc_name">KingClock <span class="pill" data-i18n="kc_pill">Horloge d’échecs</span></h2>
+            </div>
+            <p class="app-desc" data-i18n="kc_desc">Horloge d’échecs simple et élégante pour vos parties rapides ou de tournoi.</p>
+            <div class="spacer"></div>
+            <div class="store">
+              <a id="store-kc" class="store-badge" href="#" target="_blank" rel="noopener" aria-label="Télécharger KingClock sur l’App Store">
+                <span class="apple" aria-hidden="true"></span>
+                <span><strong data-i18n="download">Télécharger</strong> <span class="sub" data-i18n="on_appstore">sur l’App Store</span></span>
+              </a>
+            </div>
+          </article>
+
+          <article class="app" id="app-cs">
+            <div class="app-header">
+              <div class="icon" aria-hidden="true">♟️</div>
+              <h2 class="app-title" data-i18n="cs_name">ChessStreak <span class="pill" data-i18n="cs_pill">Journal d’échecs</span></h2>
+            </div>
+            <p class="app-desc" data-i18n="cs_desc">Journal d’échecs pour suivre parties, objectifs, séries et progrès.</p>
+            <div class="spacer"></div>
+            <div class="store">
+              <a id="store-cs" class="store-badge" href="#" target="_blank" rel="noopener" aria-label="Télécharger ChessStreak sur l’App Store">
+                <span class="apple" aria-hidden="true"></span>
+                <span><strong data-i18n="download">Télécharger</strong> <span class="sub" data-i18n="on_appstore">sur l’App Store</span></span>
+              </a>
+            </div>
+          </article>
+        </main>
+
+        <footer>
+          <div data-i18n="footer_hint">Conseil : remplacez chaque lien « # » par l’URL App Store officielle de vos apps.</div>
+        </footer>
+      </div>
+    </div>
+
+    <script>
+      (function(){
+        const i18n = {
+          fr: {
+            tagline: "Outils d’échecs simples et efficaces",
+            kc_name: "KingClock",
+            kc_desc: "Horloge d’échecs simple et élégante pour vos parties rapides ou de tournoi.",
+            kc_pill: "Horloge d’échecs",
+            cs_name: "ChessStreak",
+            cs_desc: "Journal d’échecs pour suivre parties, objectifs, séries et progrès.",
+            cs_pill: "Journal d’échecs",
+            on_appstore: "sur l’App Store",
+            download: "Télécharger",
+            title: "Samuel‑F — Apps",
+            meta: "Deux applications d’échecs : KingClock (horloge d’échecs) et ChessStreak (journal d’échecs).",
+            aria_kc_store: "Télécharger KingClock sur l’App Store",
+            aria_cs_store: "Télécharger ChessStreak sur l’App Store"
+          },
+          en: {
+            tagline: "Simple, effective chess tools",
+            kc_name: "KingClock",
+            kc_desc: "A clean chess clock for blitz or tournament play.",
+            kc_pill: "Chess clock",
+            cs_name: "ChessStreak",
+            cs_desc: "Chess journal to track games, goals, streaks, and progress.",
+            cs_pill: "Chess journal",
+            on_appstore: "on the App Store",
+            download: "Download",
+            title: "Samuel‑F — Apps",
+            meta: "Two chess apps: KingClock (chess clock) and ChessStreak (chess journal).",
+            aria_kc_store: "Download KingClock on the App Store",
+            aria_cs_store: "Download ChessStreak on the App Store"
+          }
+        };
+
+        const $ = (sel, root=document) => root.querySelector(sel);
+        const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+
+        function applyLang(lang){
+          const dict = i18n[lang] || i18n.fr;
+          document.documentElement.lang = lang;
+          // Text nodes
+          $$('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (dict[key]) el.textContent = dict[key];
+          });
+          // Title & meta
+          document.title = dict.title;
+          const meta = $('meta[name="description"]');
+          if (meta) meta.setAttribute('content', dict.meta);
+          // Aria labels for store badges
+          $('#store-kc')?.setAttribute('aria-label', dict.aria_kc_store);
+          $('#store-cs')?.setAttribute('aria-label', dict.aria_cs_store);
+          // Toggle state
+          $('#btn-fr')?.setAttribute('aria-pressed', String(lang==='fr'));
+          $('#btn-en')?.setAttribute('aria-pressed', String(lang==='en'));
+        }
+
+        function setLang(lang){
+          localStorage.setItem('lang', lang);
+          const url = new URL(window.location);
+          url.searchParams.set('lang', lang);
+          window.history.replaceState({}, '', url);
+          applyLang(lang);
+        }
+
+        // Init language: ?lang=, then localStorage, else browser
+        const urlLang = new URLSearchParams(location.search).get('lang');
+        const saved = localStorage.getItem('lang');
+        const browser = (navigator.language || 'fr').slice(0,2).toLowerCase();
+        const initial = (urlLang || saved || (browser==='en' ? 'en' : 'fr'));
+        applyLang(initial);
+
+        $('#btn-fr')?.addEventListener('click', () => setLang('fr'));
+        $('#btn-en')?.addEventListener('click', () => setLang('en'));
+      })();
+    </script>
+  </body>
+</html>
